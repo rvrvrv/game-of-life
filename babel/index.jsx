@@ -1,13 +1,55 @@
-class Cell extends React.Component {
+class CtrlBtn extends React.Component {
   constructor() {
     super();
+    this.state = { isHovered: false };
   }
+
   render() {
-    const statusColor = this.props.alive ? '#990' : '#000';
+    const btnStyle = {
+      backgroundColor: '#000',
+      color: '#990',
+      border: '1px solid #990',
+      borderRadius: 3,
+      fontSize: 24,
+      height: 50,
+      width: 50
+    };
+    return (
+      <button
+        style={btnStyle}
+        onClick={this.props.onClick}
+        data-ctrl={this.props.ctrl}
+      >
+        {this.props.icon}
+      </button>
+    );
+  }
+}
+const ButtonGroup = props => (
+  <div style={{ textAlign: 'center', marginBottom: 10 }}>
+    <CtrlBtn
+      onClick={props.onClick}
+      running={props.running}
+      ctrl={'PlayPause'}
+      icon={
+        props.running ? (
+          <i className="fa fa-pause" />
+        ) : (
+          <i className="fa fa-play" />
+        )
+      }
+    />
+    <CtrlBtn onClick={props.onClick} icon={<i className="fa fa-retweet" />} />
+  </div>
+);
+
+class Cell extends React.Component {
+  render() {
+    const aliveColor = this.props.alive ? '#990' : '#000';
     return (
       <div
         style={{
-          backgroundColor: statusColor,
+          backgroundColor: aliveColor,
           border: '1px double #333',
           width: '1.3vh',
           minHeight: '1.3vh'
@@ -35,16 +77,38 @@ const Grid = props => (
 class GridContainer extends React.Component {
   constructor() {
     super();
-    this.state = { running: 'true', cells: [], gen: 0, size: 50 };
+    this.state = { running: 'false', cells: [], gen: 0, size: 50 };
   }
 
   // Upon load, create a random grid and begin life
   componentDidMount() {
-    this.randomGrid();
+    this.restartGame();
     setInterval(() => {
       if (this.state.running) this.iterateLife();
     }, 100);
-    setTimeout(() => this.setState({ running: false }), 20000);
+    // setTimeout(() => this.setState({ running: false }), 20000);
+  }
+
+  // Handle clicks from ButtonGroup
+  handleClick(e) {
+    // Play/Pause button
+    if (e.target.dataset.ctrl === 'PlayPause') {
+      this.setState(prevState => ({ running: !prevState.running }));
+    } else {
+      // Restart button
+      this.restartGame();
+    }
+  }
+
+  // Restart game with a new grid
+  restartGame() {
+    // Restore initial state
+    this.setState({ running: 'false', cells: [], gen: 0 }, () => {
+      // Create a random grid
+      this.randomGrid();
+      // Restart running state
+      this.setState({ running: 'true' });
+    });
   }
 
   // Iterate life, based on Conway's rules
@@ -112,6 +176,10 @@ class GridContainer extends React.Component {
   render() {
     return (
       <div>
+        <ButtonGroup
+          onClick={this.handleClick.bind(this)}
+          running={this.state.running}
+        />
         <Grid cells={this.state.cells} size={this.state.size} />
         <h3
           style={{
