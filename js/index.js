@@ -1,44 +1,101 @@
-"use strict";
+'use strict';
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError('Cannot call a class as a function');
+  }
+}
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _possibleConstructorReturn(self, call) {
+  if (!self) {
+    throw new ReferenceError(
+      "this hasn't been initialised - super() hasn't been called"
+    );
+  }
+  return call && (typeof call === 'object' || typeof call === 'function')
+    ? call
+    : self;
+}
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _inherits(subClass, superClass) {
+  if (typeof superClass !== 'function' && superClass !== null) {
+    throw new TypeError(
+      'Super expression must either be null or a function, not ' +
+        typeof superClass
+    );
+  }
+  subClass.prototype = Object.create(superClass && superClass.prototype, {
+    constructor: {
+      value: subClass,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    }
+  });
+  if (superClass)
+    Object.setPrototypeOf
+      ? Object.setPrototypeOf(subClass, superClass)
+      : (subClass.__proto__ = superClass);
+}
 
 var CtrlBtn = function CtrlBtn(props) {
   return React.createElement(
-    "button",
-    { onClick: props.onCtrl, "data-ctrl": props.ctrl },
+    'button',
+    { onClick: props.onCtrl, 'data-ctrl': props.ctrl },
     props.icon
   );
 };
 
 var ButtonGroup = function ButtonGroup(props) {
   return React.createElement(
-    "div",
-    { style: { textAlign: "center", marginBottom: 10 } },
+    'div',
+    { style: { textAlign: 'center', marginBottom: 10 } },
     React.createElement(CtrlBtn, {
-      running: props.running,
-      ctrl: "PlayPause",
-      icon: props.running ? React.createElement("i", { className: "fa fa-pause", "data-ctrl": "PlayPause" }) : React.createElement("i", { className: "fa fa-play", "data-ctrl": "PlayPause" }),
+      icon: React.createElement('i', {
+        className: 'fa fa-exclamation-triangle',
+        'data-ctrl': 'Clear'
+      }),
+      onCtrl: props.onCtrl,
+      ctrl: 'Clear'
+    }),
+    React.createElement(CtrlBtn, {
+      icon: React.createElement('i', { className: 'fa fa-retweet' }),
       onCtrl: props.onCtrl
     }),
-    React.createElement(CtrlBtn, { icon: React.createElement("i", { className: "fa fa-retweet" }), onCtrl: props.onCtrl }),
     React.createElement(CtrlBtn, {
-      icon: React.createElement("i", { className: "fa fa-expand", "data-ctrl": "Grow" }),
-      onCtrl: props.onCtrl,
-      ctrl: "Grow"
+      running: props.running,
+      ctrl: 'PlayPause',
+      icon: props.running
+        ? React.createElement('i', {
+            className: 'fa fa-pause',
+            'data-ctrl': 'PlayPause'
+          })
+        : React.createElement('i', {
+            className: 'fa fa-play',
+            'data-ctrl': 'PlayPause'
+          }),
+      onCtrl: props.onCtrl
     }),
     React.createElement(CtrlBtn, {
-      icon: React.createElement("i", { className: "fa fa-compress", "data-ctrl": "Shrink" }),
+      icon: React.createElement('i', {
+        className: 'fa fa-expand',
+        'data-ctrl': 'Grow'
+      }),
       onCtrl: props.onCtrl,
-      ctrl: "Shrink"
+      ctrl: 'Grow'
+    }),
+    React.createElement(CtrlBtn, {
+      icon: React.createElement('i', {
+        className: 'fa fa-compress',
+        'data-ctrl': 'Shrink'
+      }),
+      onCtrl: props.onCtrl,
+      ctrl: 'Shrink'
     })
   );
 };
 
-var Cell = function (_React$Component) {
+var Cell = (function(_React$Component) {
   _inherits(Cell, _React$Component);
 
   function Cell() {
@@ -48,11 +105,11 @@ var Cell = function (_React$Component) {
   }
 
   Cell.prototype.render = function render() {
-    var aliveColor = this.props.alive ? "#990" : "#000";
-    return React.createElement("div", {
+    var aliveColor = this.props.alive ? '#990' : '#000';
+    return React.createElement('div', {
       style: {
         backgroundColor: aliveColor,
-        border: ".1vh solid #333",
+        border: '.1vh solid #333',
         width: this.props.cellSize,
         minHeight: this.props.cellSize
       }
@@ -60,21 +117,23 @@ var Cell = function (_React$Component) {
   };
 
   return Cell;
-}(React.Component);
+})(React.Component);
 
 var GridRow = function GridRow(props) {
   return React.createElement(
-    "div",
+    'div',
     {
       style: {
-        display: "flex",
-        justifyContent: "center"
+        display: 'flex',
+        justifyContent: 'center'
       }
     },
-    props.cells.map(function (status) {
+    props.cells.map(function(status) {
       return React.createElement(Cell, {
         alive: status,
-        cellSize: ((700 - props.cells.length) / (11 * props.cells.length)).toFixed(2) + "vh"
+        cellSize:
+          ((700 - props.cells.length) / (11 * props.cells.length)).toFixed(2) +
+          'vh'
       });
     })
   );
@@ -82,15 +141,15 @@ var GridRow = function GridRow(props) {
 
 var Grid = function Grid(props) {
   return React.createElement(
-    "div",
+    'div',
     null,
-    props.cells.map(function (row) {
+    props.cells.map(function(row) {
       return React.createElement(GridRow, { cells: row });
     })
   );
 };
 
-var GridContainer = function (_React$Component2) {
+var GridContainer = (function(_React$Component2) {
   _inherits(GridContainer, _React$Component2);
 
   function GridContainer() {
@@ -99,7 +158,13 @@ var GridContainer = function (_React$Component2) {
     var _this2 = _possibleConstructorReturn(this, _React$Component2.call(this));
 
     _this2.timer;
-    _this2.state = { running: false, cells: [], gen: 0, size: 35 };
+    _this2.state = {
+      running: false,
+      cleared: false,
+      cells: [],
+      gen: 0,
+      size: 35
+    };
     return _this2;
   }
 
@@ -109,7 +174,7 @@ var GridContainer = function (_React$Component2) {
     var _this3 = this;
 
     this.restartGame();
-    this.timer = setInterval(function () {
+    this.timer = setInterval(function() {
       if (_this3.state.running) _this3.iterateLife();
     }, 100);
   };
@@ -123,15 +188,29 @@ var GridContainer = function (_React$Component2) {
   // Handle clicks from ButtonGroup
 
   GridContainer.prototype.handleClick = function handleClick(e) {
+    var _this4 = this;
+
     var ctrl = e.target.dataset.ctrl;
-    //Play/Pause buttons
-    if (ctrl === "PlayPause") return this.setState(function (prevState) {
-      return { running: !prevState.running };
-    });
-    //Grow/Shrink buttons
-    if (ctrl === "Grow" || ctrl === "Shrink") {
-      if (ctrl === "Grow" && this.state.size < 86) {
-        this.setState(function (prevState) {
+    // Play/Pause buttons
+    if (ctrl === 'PlayPause') {
+      return this.state.cleared
+        ? this.restartGame()
+        : this.setState(function(prevState) {
+            return { running: !prevState.running };
+          });
+    }
+    // Clear button
+    if (ctrl === 'Clear') {
+      // Stop iterating life
+      return this.setState({ running: false, gen: 0 }, function() {
+        // Clear the grid
+        _this4.randomGrid(true);
+      });
+    }
+    // Grow/Shrink buttons
+    if (ctrl === 'Grow' || ctrl === 'Shrink') {
+      if (ctrl === 'Grow' && this.state.size < 86) {
+        this.setState(function(prevState) {
           return {
             size: prevState.size + 10,
             running: false
@@ -139,8 +218,8 @@ var GridContainer = function (_React$Component2) {
         });
         return this.restartGame();
       }
-      if (ctrl === "Shrink" && this.state.size > 14) {
-        this.setState(function (prevState) {
+      if (ctrl === 'Shrink' && this.state.size > 14) {
+        this.setState(function(prevState) {
           return {
             size: prevState.size - 10,
             running: false
@@ -148,54 +227,60 @@ var GridContainer = function (_React$Component2) {
         });
         return this.restartGame();
       }
-    } else
-      //Restart button
-      this.restartGame();
+    } else return this.restartGame(); // Restart button
   };
 
   // Restart game with a new grid
 
   GridContainer.prototype.restartGame = function restartGame() {
-    var _this4 = this;
+    var _this5 = this;
 
     // Restore initial state
-    this.setState({ running: false, cells: [], gen: 0 }, function () {
-      // Create a random grid
-      _this4.randomGrid();
-      // Restart running state
-      _this4.setState({ running: true });
-    });
+    this.setState(
+      { running: false, cells: [], gen: 0, cleared: false },
+      function() {
+        // Create a random grid
+        _this5.randomGrid();
+        // Restart running state
+        _this5.setState({ running: true });
+      }
+    );
   };
 
   // Iterate life, based on Conway's rules
 
   GridContainer.prototype.iterateLife = function iterateLife() {
-    var _this5 = this;
+    var _this6 = this;
 
     // Ensure the grid should be running
     if (!this.state.running) return;
     // Create a deep clone of the current cells, which will be replaced by the next grid
     var nextGrid = JSON.parse(JSON.stringify(this.state.cells));
     // Iterate through each row of cells
-    this.state.cells.forEach(function (row, rowIdx) {
+    this.state.cells.forEach(function(row, rowIdx) {
       // Implement Conway's rules
-      row.forEach(function (cell, cellIdx) {
-        var neighbors = _this5.tallyNeighbors(rowIdx, cellIdx);
+      row.forEach(function(cell, cellIdx) {
+        var neighbors = _this6.tallyNeighbors(rowIdx, cellIdx);
         // Live cells with < 2 or > 3 neighbors should die
-        if (cell) nextGrid[rowIdx][cellIdx] = !!(neighbors === 2 || neighbors === 3);
+        if (cell) {
+          nextGrid[rowIdx][cellIdx] = !!(neighbors === 2 || neighbors === 3);
+        }
         // Dead cells with 3 neighbors should become alive
         if (!cell) nextGrid[rowIdx][cellIdx] = !!(neighbors === 3);
       });
     });
     // Update state with next generation of cells
-    this.setState(function (prevState) {
+    this.setState(function(prevState) {
       return { cells: nextGrid, gen: prevState.gen + 1 };
     });
   };
 
   // Count how many living neighbors a specific cell has
 
-  GridContainer.prototype.tallyNeighbors = function tallyNeighbors(rowIdx, cellIdx) {
+  GridContainer.prototype.tallyNeighbors = function tallyNeighbors(
+    rowIdx,
+    cellIdx
+  ) {
     // Get largest row/column index
     var maxIdx = this.state.size - 1;
     // Indices of each neighbor (with built-in wraparound checks)
@@ -205,56 +290,72 @@ var GridContainer = function (_React$Component2) {
     var rightSide = cellIdx === maxIdx ? 0 : cellIdx + 1; // Wraparound right edge
     var _c = this.state.cells; // Temp var for typing brevity
     // Store values of all neighbors
-    var cellNeighbors = [_c[topRow][leftSide], _c[topRow][cellIdx], _c[topRow][rightSide], _c[rowIdx][leftSide], _c[rowIdx][rightSide], _c[btmRow][leftSide], _c[btmRow][cellIdx], _c[btmRow][rightSide]];
+    var cellNeighbors = [
+      _c[topRow][leftSide],
+      _c[topRow][cellIdx],
+      _c[topRow][rightSide],
+      _c[rowIdx][leftSide],
+      _c[rowIdx][rightSide],
+      _c[btmRow][leftSide],
+      _c[btmRow][cellIdx],
+      _c[btmRow][rightSide]
+    ];
     // Return total number of living neighbors for one cell
-    return cellNeighbors.filter(function (alive) {
+    return cellNeighbors.filter(function(alive) {
       return alive;
     }).length;
   };
 
   // Generate a random grid
 
-  GridContainer.prototype.randomGrid = function randomGrid() {
+  GridContainer.prototype.randomGrid = function randomGrid(clear) {
     var newGrid = [];
     var newRow = [];
     for (var i = 0; i < this.state.size; i++) {
       for (var j = 0; j < this.state.size; j++) {
-        newRow.push(Math.random() < 0.15);
+        var newValue = clear ? false : Math.random() < 0.15;
+        newRow.push(newValue);
       }
       newGrid.push(newRow);
       newRow = [];
     }
-    this.setState({ cells: newGrid });
+    this.setState({ cells: newGrid, cleared: clear });
   };
 
   GridContainer.prototype.render = function render() {
     return React.createElement(
-      "div",
+      'div',
       null,
       React.createElement(ButtonGroup, {
         onCtrl: this.handleClick.bind(this),
         running: this.state.running
       }),
-      React.createElement(Grid, { cells: this.state.cells, size: this.state.size }),
+      React.createElement(Grid, {
+        cells: this.state.cells,
+        size: this.state.size
+      }),
       React.createElement(
-        "h3",
+        'h3',
         {
           style: {
-            color: "#990",
-            textAlign: "center",
-            fontFamily: "Tahoma"
+            color: '#990',
+            textAlign: 'center',
+            fontFamily: 'Tahoma'
           }
         },
-        "Generation ",
+        'Generation ',
         this.state.gen
       )
     );
   };
 
   return GridContainer;
-}(React.Component);
+})(React.Component);
 
 var App = function App() {
   return React.createElement(GridContainer, null);
 };
-ReactDOM.render(React.createElement(App, null), document.getElementById("root"));
+ReactDOM.render(
+  React.createElement(App, null),
+  document.getElementById('root')
+);

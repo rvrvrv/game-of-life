@@ -7,6 +7,12 @@ const CtrlBtn = props => (
 const ButtonGroup = props => (
   <div style={{ textAlign: 'center', marginBottom: 10 }}>
     <CtrlBtn
+      icon={<i className="fa fa-exclamation-triangle" data-ctrl="Clear" />}
+      onCtrl={props.onCtrl}
+      ctrl={'Clear'}
+    />
+    <CtrlBtn icon={<i className="fa fa-retweet" />} onCtrl={props.onCtrl} />
+    <CtrlBtn
       running={props.running}
       ctrl={'PlayPause'}
       icon={
@@ -18,7 +24,7 @@ const ButtonGroup = props => (
       }
       onCtrl={props.onCtrl}
     />
-    <CtrlBtn icon={<i className="fa fa-retweet" />} onCtrl={props.onCtrl} />
+
     <CtrlBtn
       icon={<i className="fa fa-expand" data-ctrl="Grow" />}
       onCtrl={props.onCtrl}
@@ -76,7 +82,13 @@ class GridContainer extends React.Component {
   constructor() {
     super();
     this.timer;
-    this.state = { running: false, cells: [], gen: 0, size: 35 };
+    this.state = {
+      running: false,
+      cleared: false,
+      cells: [],
+      gen: 0,
+      size: 35
+    };
   }
 
   // Upon load, create a random grid and begin life
@@ -97,7 +109,17 @@ class GridContainer extends React.Component {
     const ctrl = e.target.dataset.ctrl;
     // Play/Pause buttons
     if (ctrl === 'PlayPause') {
-      return this.setState(prevState => ({ running: !prevState.running }));
+      return this.state.cleared
+        ? this.restartGame()
+        : this.setState(prevState => ({ running: !prevState.running }));
+    }
+    // Clear button
+    if (ctrl === 'Clear') {
+      // Stop iterating life
+      return this.setState({ running: false, gen: 0 }, () => {
+        // Clear the grid
+        this.randomGrid(true);
+      });
     }
     // Grow/Shrink buttons
     if (ctrl === 'Grow' || ctrl === 'Shrink') {
@@ -121,7 +143,7 @@ class GridContainer extends React.Component {
   // Restart game with a new grid
   restartGame() {
     // Restore initial state
-    this.setState({ running: false, cells: [], gen: 0 }, () => {
+    this.setState({ running: false, cells: [], gen: 0, cleared: false }, () => {
       // Create a random grid
       this.randomGrid();
       // Restart running state
@@ -178,17 +200,18 @@ class GridContainer extends React.Component {
   }
 
   // Generate a random grid
-  randomGrid() {
+  randomGrid(clear) {
     const newGrid = [];
     let newRow = [];
     for (let i = 0; i < this.state.size; i++) {
       for (let j = 0; j < this.state.size; j++) {
-        newRow.push(Math.random() < 0.15);
+        const newValue = clear ? false : Math.random() < 0.15;
+        newRow.push(newValue);
       }
       newGrid.push(newRow);
       newRow = [];
     }
-    this.setState({ cells: newGrid });
+    this.setState({ cells: newGrid, cleared: clear });
   }
 
   render() {
