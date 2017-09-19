@@ -1,3 +1,18 @@
 body {
   background: #110;
 }
+
+button {
+  background-color: #000;
+  color: #990;
+  border: 1px solid #990;
+  border-radius: 3px;
+  font-size: 24px;
+  height: 50px;
+  width: 50px;
+  transition: color 0.2s;
+}
+
+button:hover {
+  color: #cc8;
+}

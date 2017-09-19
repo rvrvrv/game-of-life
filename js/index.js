@@ -6,63 +6,45 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var CtrlBtn = function (_React$Component) {
-  _inherits(CtrlBtn, _React$Component);
-
-  function CtrlBtn() {
-    _classCallCheck(this, CtrlBtn);
-
-    var _this = _possibleConstructorReturn(this, _React$Component.call(this));
-
-    _this.state = { isHovered: false };
-    return _this;
-  }
-
-  CtrlBtn.prototype.render = function render() {
-    var btnStyle = {
-      backgroundColor: "#000",
-      color: "#990",
-      border: "1px solid #990",
-      borderRadius: 3,
-      fontSize: 24,
-      height: 50,
-      width: 50
-    };
-    return React.createElement(
-      "button",
-      {
-        style: btnStyle,
-        onClick: this.props.onClick,
-        "data-ctrl": this.props.ctrl
-      },
-      this.props.icon
-    );
-  };
-
-  return CtrlBtn;
-}(React.Component);
+var CtrlBtn = function CtrlBtn(props) {
+  return React.createElement(
+    "button",
+    { onClick: props.onCtrl, "data-ctrl": props.ctrl },
+    props.icon
+  );
+};
 
 var ButtonGroup = function ButtonGroup(props) {
   return React.createElement(
     "div",
     { style: { textAlign: "center", marginBottom: 10 } },
     React.createElement(CtrlBtn, {
-      onClick: props.onClick,
       running: props.running,
       ctrl: "PlayPause",
-      icon: props.running ? React.createElement("i", { className: "fa fa-pause" }) : React.createElement("i", { className: "fa fa-play" })
+      icon: props.running ? React.createElement("i", { className: "fa fa-pause", "data-ctrl": "PlayPause" }) : React.createElement("i", { className: "fa fa-play", "data-ctrl": "PlayPause" }),
+      onCtrl: props.onCtrl
     }),
-    React.createElement(CtrlBtn, { onClick: props.onClick, icon: React.createElement("i", { className: "fa fa-retweet" }) })
+    React.createElement(CtrlBtn, { icon: React.createElement("i", { className: "fa fa-retweet" }), onCtrl: props.onCtrl }),
+    React.createElement(CtrlBtn, {
+      icon: React.createElement("i", { className: "fa fa-expand", "data-ctrl": "Grow" }),
+      onCtrl: props.onCtrl,
+      ctrl: "Grow"
+    }),
+    React.createElement(CtrlBtn, {
+      icon: React.createElement("i", { className: "fa fa-compress", "data-ctrl": "Shrink" }),
+      onCtrl: props.onCtrl,
+      ctrl: "Shrink"
+    })
   );
 };
 
-var Cell = function (_React$Component2) {
-  _inherits(Cell, _React$Component2);
+var Cell = function (_React$Component) {
+  _inherits(Cell, _React$Component);
 
   function Cell() {
     _classCallCheck(this, Cell);
 
-    return _possibleConstructorReturn(this, _React$Component2.call(this));
+    return _possibleConstructorReturn(this, _React$Component.call(this));
   }
 
   Cell.prototype.render = function render() {
@@ -70,9 +52,9 @@ var Cell = function (_React$Component2) {
     return React.createElement("div", {
       style: {
         backgroundColor: aliveColor,
-        border: "1px double #333",
-        width: "1.3vh",
-        minHeight: "1.3vh"
+        border: ".1vh solid #333",
+        width: this.props.cellSize,
+        minHeight: this.props.cellSize
       }
     });
   };
@@ -90,7 +72,10 @@ var GridRow = function GridRow(props) {
       }
     },
     props.cells.map(function (status) {
-      return React.createElement(Cell, { alive: status });
+      return React.createElement(Cell, {
+        alive: status,
+        cellSize: ((700 - props.cells.length) / (11 * props.cells.length)).toFixed(2) + "vh"
+      });
     })
   );
 };
@@ -105,59 +90,87 @@ var Grid = function Grid(props) {
   );
 };
 
-var GridContainer = function (_React$Component3) {
-  _inherits(GridContainer, _React$Component3);
+var GridContainer = function (_React$Component2) {
+  _inherits(GridContainer, _React$Component2);
 
   function GridContainer() {
     _classCallCheck(this, GridContainer);
 
-    var _this3 = _possibleConstructorReturn(this, _React$Component3.call(this));
+    var _this2 = _possibleConstructorReturn(this, _React$Component2.call(this));
 
-    _this3.state = { running: "false", cells: [], gen: 0, size: 50 };
-    return _this3;
+    _this2.timer;
+    _this2.state = { running: false, cells: [], gen: 0, size: 35 };
+    return _this2;
   }
 
   // Upon load, create a random grid and begin life
 
   GridContainer.prototype.componentDidMount = function componentDidMount() {
-    var _this4 = this;
+    var _this3 = this;
 
     this.restartGame();
-    setInterval(function () {
-      if (_this4.state.running) _this4.iterateLife();
+    this.timer = setInterval(function () {
+      if (_this3.state.running) _this3.iterateLife();
     }, 100);
-    // setTimeout(() => this.setState({ running: false }), 20000);
+  };
+
+  // Clear timer upon unmount
+
+  GridContainer.prototype.componentWillUnmount = function componentWillUnmount() {
+    clearInterval(this.timer);
   };
 
   // Handle clicks from ButtonGroup
 
   GridContainer.prototype.handleClick = function handleClick(e) {
-    // Play/Pause button
-    if (e.target.dataset.ctrl === "PlayPause") this.setState(function (prevState) {
+    var ctrl = e.target.dataset.ctrl;
+    //Play/Pause buttons
+    if (ctrl === "PlayPause") return this.setState(function (prevState) {
       return { running: !prevState.running };
-    });else
-      // Restart button
+    });
+    //Grow/Shrink buttons
+    if (ctrl === "Grow" || ctrl === "Shrink") {
+      if (ctrl === "Grow" && this.state.size < 86) {
+        this.setState(function (prevState) {
+          return {
+            size: prevState.size + 10,
+            running: false
+          };
+        });
+        return this.restartGame();
+      }
+      if (ctrl === "Shrink" && this.state.size > 14) {
+        this.setState(function (prevState) {
+          return {
+            size: prevState.size - 10,
+            running: false
+          };
+        });
+        return this.restartGame();
+      }
+    } else
+      //Restart button
       this.restartGame();
   };
 
   // Restart game with a new grid
 
   GridContainer.prototype.restartGame = function restartGame() {
-    var _this5 = this;
+    var _this4 = this;
 
     // Restore initial state
-    this.setState({ running: "false", cells: [], gen: 0 }, function () {
+    this.setState({ running: false, cells: [], gen: 0 }, function () {
       // Create a random grid
-      _this5.randomGrid();
+      _this4.randomGrid();
       // Restart running state
-      _this5.setState({ running: "true" });
+      _this4.setState({ running: true });
     });
   };
 
   // Iterate life, based on Conway's rules
 
   GridContainer.prototype.iterateLife = function iterateLife() {
-    var _this6 = this;
+    var _this5 = this;
 
     // Ensure the grid should be running
     if (!this.state.running) return;
@@ -167,7 +180,7 @@ var GridContainer = function (_React$Component3) {
     this.state.cells.forEach(function (row, rowIdx) {
       // Implement Conway's rules
       row.forEach(function (cell, cellIdx) {
-        var neighbors = _this6.tallyNeighbors(rowIdx, cellIdx);
+        var neighbors = _this5.tallyNeighbors(rowIdx, cellIdx);
         // Live cells with < 2 or > 3 neighbors should die
         if (cell) nextGrid[rowIdx][cellIdx] = !!(neighbors === 2 || neighbors === 3);
         // Dead cells with 3 neighbors should become alive
@@ -206,7 +219,7 @@ var GridContainer = function (_React$Component3) {
     var newRow = [];
     for (var i = 0; i < this.state.size; i++) {
       for (var j = 0; j < this.state.size; j++) {
-        newRow.push(Math.random() < 0.2);
+        newRow.push(Math.random() < 0.15);
       }
       newGrid.push(newRow);
       newRow = [];
@@ -219,7 +232,7 @@ var GridContainer = function (_React$Component3) {
       "div",
       null,
       React.createElement(ButtonGroup, {
-        onClick: this.handleClick.bind(this),
+        onCtrl: this.handleClick.bind(this),
         running: this.state.running
       }),
       React.createElement(Grid, { cells: this.state.cells, size: this.state.size }),
