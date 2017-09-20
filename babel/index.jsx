@@ -1,93 +1,144 @@
 const CtrlBtn = props => (
-  <button onClick={props.onCtrl} data-ctrl={props.ctrl}>
+  <button
+    onClick={props.onCtrl}
+    onMouseEnter={props.onHover}
+    onMouseLeave={props.onLeave}
+    data-ctrl={props.ctrl}
+  >
     {props.icon}
-  </button>
-);
+  </button>);
 
-const ButtonGroup = props => (
-  <div style={{ textAlign: 'center', marginBottom: 10 }}>
-    <CtrlBtn
-      icon={<i className="fa fa-exclamation-triangle" data-ctrl="Clear" />}
-      onCtrl={props.onCtrl}
-      ctrl={'Clear'}
-    />
-    <CtrlBtn icon={<i className="fa fa-retweet" />} onCtrl={props.onCtrl} />
-    <CtrlBtn
-      running={props.running}
-      ctrl={'PlayPause'}
-      icon={
-        props.running ? (
-          <i className="fa fa-pause" data-ctrl="PlayPause" />
-        ) : (
-          <i className="fa fa-play" data-ctrl="PlayPause" />
-        )
-      }
-      onCtrl={props.onCtrl}
-    />
+class ButtonGroup extends React.Component {
+  constructor() {
+    super();
+    this.state = { hovered: false, ctrlText: null };
+    this.handleHover = this.handleHover.bind(this);
+    this.exitHover = this.exitHover.bind(this);
+  }
 
-    <CtrlBtn
-      icon={<i className="fa fa-expand" data-ctrl="Grow" />}
-      onCtrl={props.onCtrl}
-      ctrl={'Grow'}
-    />
-    <CtrlBtn
-      icon={<i className="fa fa-compress" data-ctrl="Shrink" />}
-      onCtrl={props.onCtrl}
-      ctrl={'Shrink'}
-    />
-  </div>
-);
+  // Display tooltip text when hovering over buttons
+  handleHover(e) {
+    let ctrlText = e.target.dataset.ctrl;
+    if (ctrlText === 'Clear' || ctrlText === 'Grow' || ctrlText === 'Shrink') { ctrlText += ' Grid'; } else if (ctrlText === 'Restart') ctrlText += ' Game';
+    else {
+    // Play/Pause depends on running state
+      ctrlText = this.props.running ? 'Pause' : 'Play';
+    }
+    this.setState({ hovered: true, ctrlText });
+  }
+
+  // Clear tooltip text
+  exitHover() {
+    this.setState({ hovered: false });
+  }
+
+  render() {
+    const spinner = this.props.running
+      ? <i className="fa fa-spin fa-minus" />
+      : <i className="fa fa-hourglass-2" />;
+    return (
+      <div>
+        <CtrlBtn
+          ctrl="Clear"
+          icon={<i className="fa fa-exclamation-triangle" data-ctrl="Clear" />}
+          onCtrl={this.props.onCtrl}
+          onHover={this.handleHover}
+          onLeave={this.exitHover}
+        />
+        <CtrlBtn
+          ctrl="Restart"
+          icon={<i className="fa fa-retweet" data-ctrl="Restart" />}
+          onCtrl={this.props.onCtrl}
+          onHover={this.handleHover}
+          onLeave={this.exitHover}
+        />
+        <CtrlBtn
+          ctrl="PlayPause"
+          icon={
+            this.props.running
+              ? <i className="fa fa-pause" data-ctrl="PlayPause" />
+              : <i className="fa fa-play" data-ctrl="PlayPause" />
+          }
+          onCtrl={this.props.onCtrl}
+          onHover={this.handleHover}
+          onLeave={this.exitHover}
+        />
+        <CtrlBtn
+          ctrl={'Grow'}
+          icon={<i className="fa fa-expand" data-ctrl="Grow" />}
+          onCtrl={this.props.onCtrl}
+          onHover={this.handleHover}
+          onLeave={this.exitHover}
+        />
+        <CtrlBtn
+          ctrl={'Shrink'}
+          icon={<i className="fa fa-compress" data-ctrl="Shrink" />}
+          onCtrl={this.props.onCtrl}
+          onHover={this.handleHover}
+          onLeave={this.exitHover}
+        />
+        <h3 style={{ margin: 5 }}>
+          {this.state.hovered ? this.state.ctrlText : spinner}
+        </h3>
+      </div>
+    );
+  }
+}
 
 class Cell extends React.Component {
   constructor() {
     super();
   }
   render() {
+  // Cell color is based on alive status
     const aliveColor = this.props.alive ? '#990' : '#000';
+    // Border size is based on cell size
+    const cellSize = +this.props.cellSize.slice(0, -2);
+    const borderWidth = cellSize > 1 ? cellSize * 0.15 : cellSize;
     return (
       <div
         style={{
           backgroundColor: aliveColor,
-          border: '.1vh solid #333',
+          borderWidth,
+          borderStyle: 'solid',
+          borderColor: '#222',
           width: this.props.cellSize,
-          minHeight: this.props.cellSize
+          minHeight: this.props.cellSize,
         }}
       />
     );
   }
 }
 
-const GridRow = props => (
-  <div
+const GridRow = props =>
+  (<div
     style={{
       display: 'flex',
-      justifyContent: 'center'
+      justifyContent: 'center',
     }}
   >
-    {props.cells.map(status => (
-      <Cell
+    {props.cells.map(status =>
+      (<Cell
         alive={status}
         cellSize={`${((700 - props.cells.length) /
-          (11 * props.cells.length)).toFixed(2)}vh`}
-      />
-    ))}
-  </div>
-);
+        (11 * props.cells.length)).toFixed(2)}vh`}
+      />),
+    )}
+  </div>);
 
-const Grid = props => (
-  <div>{props.cells.map(row => <GridRow cells={row} />)}</div>
-);
+const Grid = props =>
+  <div>{props.cells.map(row => <GridRow cells={row} />)}</div>;
 
 class GridContainer extends React.Component {
   constructor() {
     super();
-    this.timer;
+    this.timer = null;
     this.state = {
       running: false,
       cleared: false,
       cells: [],
       gen: 0,
-      size: 35
+      size: 25,
     };
   }
 
@@ -115,9 +166,9 @@ class GridContainer extends React.Component {
     }
     // Clear button
     if (ctrl === 'Clear') {
-      // Stop iterating life
+    // Stop iterating life
       return this.setState({ running: false, gen: 0 }, () => {
-        // Clear the grid
+      // Clear the grid
         this.randomGrid(true);
       });
     }
@@ -126,14 +177,14 @@ class GridContainer extends React.Component {
       if (ctrl === 'Grow' && this.state.size < 86) {
         this.setState(prevState => ({
           size: prevState.size + 10,
-          running: false
+          running: false,
         }));
         return this.restartGame();
       }
       if (ctrl === 'Shrink' && this.state.size > 14) {
         this.setState(prevState => ({
           size: prevState.size - 10,
-          running: false
+          running: false,
         }));
         return this.restartGame();
       }
@@ -142,9 +193,9 @@ class GridContainer extends React.Component {
 
   // Restart game with a new grid
   restartGame() {
-    // Restore initial state
+  // Restore initial state
     this.setState({ running: false, cells: [], gen: 0, cleared: false }, () => {
-      // Create a random grid
+    // Create a random grid
       this.randomGrid();
       // Restart running state
       this.setState({ running: true });
@@ -153,13 +204,13 @@ class GridContainer extends React.Component {
 
   // Iterate life, based on Conway's rules
   iterateLife() {
-    // Ensure the grid should be running
+  // Ensure the grid should be running
     if (!this.state.running) return;
     // Create a deep clone of the current cells, which will be replaced by the next grid
     const nextGrid = JSON.parse(JSON.stringify(this.state.cells));
     // Iterate through each row of cells
     this.state.cells.forEach((row, rowIdx) => {
-      // Implement Conway's rules
+    // Implement Conway's rules
       row.forEach((cell, cellIdx) => {
         const neighbors = this.tallyNeighbors(rowIdx, cellIdx);
         // Live cells with < 2 or > 3 neighbors should die
@@ -176,7 +227,7 @@ class GridContainer extends React.Component {
 
   // Count how many living neighbors a specific cell has
   tallyNeighbors(rowIdx, cellIdx) {
-    // Get largest row/column index
+  // Get largest row/column index
     const maxIdx = this.state.size - 1;
     // Indices of each neighbor (with built-in wraparound checks)
     const topRow = rowIdx === 0 ? maxIdx : rowIdx - 1; // Wraparound top edge
@@ -193,7 +244,7 @@ class GridContainer extends React.Component {
       _c[rowIdx][rightSide],
       _c[btmRow][leftSide],
       _c[btmRow][cellIdx],
-      _c[btmRow][rightSide]
+      _c[btmRow][rightSide],
     ];
     // Return total number of living neighbors for one cell
     return cellNeighbors.filter(alive => alive).length;
@@ -222,15 +273,7 @@ class GridContainer extends React.Component {
           running={this.state.running}
         />
         <Grid cells={this.state.cells} size={this.state.size} />
-        <h3
-          style={{
-            color: '#990',
-            textAlign: 'center',
-            fontFamily: 'Tahoma'
-          }}
-        >
-          Generation {this.state.gen}
-        </h3>
+        <h2>Generation {this.state.gen}</h2>
       </div>
     );
   }
