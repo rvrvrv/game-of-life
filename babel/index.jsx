@@ -32,10 +32,17 @@ class ButtonGroup extends React.Component {
   // Display tooltip text when hovering over buttons
   handleHover(e) {
     let ctrlText = e.target.dataset.ctrl;
-    if (ctrlText === 'Clear' || ctrlText === 'Grow' || ctrlText === 'Shrink') { ctrlText += ' Grid'; } else if (ctrlText === 'Restart') ctrlText += ' Game';
-    else {
-      // Play/Pause depends on running state
-      ctrlText = this.props.running ? 'Pause' : 'Play';
+    switch (ctrlText) {
+      case 'Clear':
+      case 'Grow':
+      case 'Shrink':
+        ctrlText += ' Grid';
+        break;
+      case 'Restart':
+        ctrlText += ' Game';
+        break;
+      default:
+        ctrlText = this.props.running ? 'Pause' : 'Play';
     }
     this.setState({ hovered: true, ctrlText });
   }

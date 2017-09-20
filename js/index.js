@@ -35,21 +35,33 @@ var ButtonGroup = function (_React$Component) {
 
   ButtonGroup.prototype.componentWillReceiveProps = function componentWillReceiveProps(nextProps) {
     // Ensure Play/Pause tooltip text updates
-    if (!this.props.running && nextProps.running && this.state.ctrlText === "Play") this.setState({ ctrlText: "Pause" });else if (this.props.running && !nextProps.running && this.state.ctrlText === "Pause") this.setState({ ctrlText: "Play" });
+    if (!this.props.running && nextProps.running && this.state.ctrlText === "Play") {
+      this.setState({ ctrlText: "Pause" });
+    } else if (this.props.running && !nextProps.running && this.state.ctrlText === "Pause") {
+      this.setState({ ctrlText: "Play" });
+    }
   };
 
   // Display tooltip text when hovering over buttons
 
   ButtonGroup.prototype.handleHover = function handleHover(e) {
     var ctrlText = e.target.dataset.ctrl;
-    if (ctrlText === "Clear" || ctrlText === "Grow" || ctrlText === "Shrink") ctrlText += " Grid";else if (ctrlText === "Restart") ctrlText += " Game";else {
-      // Play/Pause depends on running state
-      ctrlText = this.props.running ? "Pause" : "Play";
+    switch (ctrlText) {
+      case "Clear":
+      case "Grow":
+      case "Shrink":
+        ctrlText += " Grid";
+        break;
+      case "Restart":
+        ctrlText += " Game";
+        break;
+      default:
+        ctrlText = this.props.running ? "Pause" : "Play";
     }
     this.setState({ hovered: true, ctrlText: ctrlText });
   };
 
-  //Clear tooltip text
+  // Clear tooltip text
 
   ButtonGroup.prototype.exitHover = function exitHover() {
     this.setState({ hovered: false });
@@ -118,15 +130,10 @@ var Cell = function (_React$Component2) {
   Cell.prototype.render = function render() {
     // Cell color is based on alive status
     var aliveColor = this.props.alive ? "#990" : "#000";
-    // Border size is based on cell size
-    var cellSize = +this.props.cellSize.slice(0, -2);
-    var borderWidth = cellSize > 1 ? cellSize * 0.15 : cellSize;
     return React.createElement("div", {
       style: {
         backgroundColor: aliveColor,
-        borderWidth: borderWidth,
-        borderStyle: "solid",
-        borderColor: "#222",
+        border: "1px solid #110",
         width: this.props.cellSize,
         minHeight: this.props.cellSize
       }
@@ -207,13 +214,13 @@ var GridContainer = function (_React$Component3) {
 
     var ctrl = e.target.dataset.ctrl;
     // Play/Pause buttons
-    if (ctrl === "PlayPause") {
+    if (ctrl === 'PlayPause') {
       return this.state.cleared ? this.restartGame() : this.setState(function (prevState) {
         return { running: !prevState.running };
       });
     }
     // Clear button
-    if (ctrl === "Clear") {
+    if (ctrl === 'Clear') {
       // Stop iterating life
       return this.setState({ running: false, gen: 0 }, function () {
         // Clear the grid
@@ -221,8 +228,8 @@ var GridContainer = function (_React$Component3) {
       });
     }
     // Grow/Shrink buttons
-    if (ctrl === "Grow" || ctrl === "Shrink") {
-      if (ctrl === "Grow" && this.state.size < 86) {
+    if (ctrl === 'Grow' || ctrl === 'Shrink') {
+      if (ctrl === 'Grow' && this.state.size < 86) {
         this.setState(function (prevState) {
           return {
             size: prevState.size + 10,
@@ -231,7 +238,7 @@ var GridContainer = function (_React$Component3) {
         });
         return this.restartGame();
       }
-      if (ctrl === "Shrink" && this.state.size > 14) {
+      if (ctrl === 'Shrink' && this.state.size > 14) {
         this.setState(function (prevState) {
           return {
             size: prevState.size - 10,
