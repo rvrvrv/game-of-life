@@ -16,12 +16,25 @@ class ButtonGroup extends React.Component {
     this.exitHover = this.exitHover.bind(this);
   }
 
+  componentWillReceiveProps(nextProps) {
+    // Ensure Play/Pause tooltip text updates
+    if (
+      !this.props.running &&
+      nextProps.running &&
+      this.state.ctrlText === 'Play'
+    ) { this.setState({ ctrlText: 'Pause' }); } else if (
+      this.props.running &&
+      !nextProps.running &&
+      this.state.ctrlText === 'Pause'
+    ) { this.setState({ ctrlText: 'Play' }); }
+  }
+
   // Display tooltip text when hovering over buttons
   handleHover(e) {
     let ctrlText = e.target.dataset.ctrl;
     if (ctrlText === 'Clear' || ctrlText === 'Grow' || ctrlText === 'Shrink') { ctrlText += ' Grid'; } else if (ctrlText === 'Restart') ctrlText += ' Game';
     else {
-    // Play/Pause depends on running state
+      // Play/Pause depends on running state
       ctrlText = this.props.running ? 'Pause' : 'Play';
     }
     this.setState({ hovered: true, ctrlText });
@@ -90,7 +103,7 @@ class Cell extends React.Component {
     super();
   }
   render() {
-  // Cell color is based on alive status
+    // Cell color is based on alive status
     const aliveColor = this.props.alive ? '#990' : '#000';
     // Border size is based on cell size
     const cellSize = +this.props.cellSize.slice(0, -2);
@@ -110,21 +123,23 @@ class Cell extends React.Component {
   }
 }
 
-const GridRow = props =>
-  (<div
+const GridRow = props => (
+  <div
     style={{
       display: 'flex',
       justifyContent: 'center',
     }}
   >
-    {props.cells.map(status =>
-      (<Cell
+    {props.cells.map(status => (
+      <Cell
         alive={status}
         cellSize={`${((700 - props.cells.length) /
-        (11 * props.cells.length)).toFixed(2)}vh`}
-      />),
+          (11 * props.cells.length)).toFixed(2)}vh`}
+      />
+    ),
     )}
-  </div>);
+  </div>
+);
 
 const Grid = props =>
   <div>{props.cells.map(row => <GridRow cells={row} />)}</div>;
@@ -166,9 +181,9 @@ class GridContainer extends React.Component {
     }
     // Clear button
     if (ctrl === 'Clear') {
-    // Stop iterating life
+      // Stop iterating life
       return this.setState({ running: false, gen: 0 }, () => {
-      // Clear the grid
+        // Clear the grid
         this.randomGrid(true);
       });
     }
@@ -193,9 +208,9 @@ class GridContainer extends React.Component {
 
   // Restart game with a new grid
   restartGame() {
-  // Restore initial state
+    // Restore initial state
     this.setState({ running: false, cells: [], gen: 0, cleared: false }, () => {
-    // Create a random grid
+      // Create a random grid
       this.randomGrid();
       // Restart running state
       this.setState({ running: true });
@@ -204,13 +219,13 @@ class GridContainer extends React.Component {
 
   // Iterate life, based on Conway's rules
   iterateLife() {
-  // Ensure the grid should be running
+    // Ensure the grid should be running
     if (!this.state.running) return;
     // Create a deep clone of the current cells, which will be replaced by the next grid
     const nextGrid = JSON.parse(JSON.stringify(this.state.cells));
     // Iterate through each row of cells
     this.state.cells.forEach((row, rowIdx) => {
-    // Implement Conway's rules
+      // Implement Conway's rules
       row.forEach((cell, cellIdx) => {
         const neighbors = this.tallyNeighbors(rowIdx, cellIdx);
         // Live cells with < 2 or > 3 neighbors should die
@@ -227,7 +242,7 @@ class GridContainer extends React.Component {
 
   // Count how many living neighbors a specific cell has
   tallyNeighbors(rowIdx, cellIdx) {
-  // Get largest row/column index
+    // Get largest row/column index
     const maxIdx = this.state.size - 1;
     // Indices of each neighbor (with built-in wraparound checks)
     const topRow = rowIdx === 0 ? maxIdx : rowIdx - 1; // Wraparound top edge
