@@ -27,9 +27,28 @@ var ButtonGroup = function (_React$Component) {
 
     var _this = _possibleConstructorReturn(this, _React$Component.call(this));
 
+    _this.handleHover = function (e) {
+      var ctrlText = e.target.dataset.ctrl;
+      switch (ctrlText) {
+        case "Clear":
+        case "Grow":
+        case "Shrink":
+          ctrlText += " Grid";
+          break;
+        case "Restart":
+          ctrlText += " Game";
+          break;
+        default:
+          ctrlText = _this.props.running ? "Pause" : "Play";
+      }
+      _this.setState({ hovered: true, ctrlText: ctrlText });
+    };
+
+    _this.exitHover = function () {
+      _this.setState({ hovered: false });
+    };
+
     _this.state = { hovered: false, ctrlText: null };
-    _this.handleHover = _this.handleHover.bind(_this);
-    _this.exitHover = _this.exitHover.bind(_this);
     return _this;
   }
 
@@ -44,28 +63,7 @@ var ButtonGroup = function (_React$Component) {
 
   // Display tooltip text when hovering over buttons
 
-  ButtonGroup.prototype.handleHover = function handleHover(e) {
-    var ctrlText = e.target.dataset.ctrl;
-    switch (ctrlText) {
-      case "Clear":
-      case "Grow":
-      case "Shrink":
-        ctrlText += " Grid";
-        break;
-      case "Restart":
-        ctrlText += " Game";
-        break;
-      default:
-        ctrlText = this.props.running ? "Pause" : "Play";
-    }
-    this.setState({ hovered: true, ctrlText: ctrlText });
-  };
-
   // Clear tooltip text
-
-  ButtonGroup.prototype.exitHover = function exitHover() {
-    this.setState({ hovered: false });
-  };
 
   ButtonGroup.prototype.render = function render() {
     var spinner = this.props.running ? React.createElement("i", { className: "fa fa-spin fa-minus" }) : React.createElement("i", { className: "fa fa-hourglass-2" });
@@ -118,30 +116,16 @@ var ButtonGroup = function (_React$Component) {
   return ButtonGroup;
 }(React.Component);
 
-var Cell = function (_React$Component2) {
-  _inherits(Cell, _React$Component2);
-
-  function Cell() {
-    _classCallCheck(this, Cell);
-
-    return _possibleConstructorReturn(this, _React$Component2.call(this));
-  }
-
-  Cell.prototype.render = function render() {
-    // Cell color is based on alive status
-    var aliveColor = this.props.alive ? "#990" : "#000";
-    return React.createElement("div", {
-      style: {
-        backgroundColor: aliveColor,
-        border: "1px solid #110",
-        width: this.props.cellSize,
-        minHeight: this.props.cellSize
-      }
-    });
-  };
-
-  return Cell;
-}(React.Component);
+var Cell = function Cell(props) {
+  return React.createElement("div", {
+    style: {
+      backgroundColor: props.alive ? "#990" : "#000",
+      border: "1px solid #110",
+      width: props.cellSize,
+      minHeight: props.cellSize
+    }
+  });
+};
 
 var GridRow = function GridRow(props) {
   return React.createElement(
@@ -171,33 +155,72 @@ var Grid = function Grid(props) {
   );
 };
 
-var GridContainer = function (_React$Component3) {
-  _inherits(GridContainer, _React$Component3);
+var GridContainer = function (_React$Component2) {
+  _inherits(GridContainer, _React$Component2);
 
   function GridContainer() {
     _classCallCheck(this, GridContainer);
 
-    var _this3 = _possibleConstructorReturn(this, _React$Component3.call(this));
+    var _this2 = _possibleConstructorReturn(this, _React$Component2.call(this));
 
-    _this3.timer = null;
-    _this3.state = {
+    _this2.handleClick = function (e) {
+      var ctrl = e.target.dataset.ctrl;
+      // Play/Pause buttons
+      if (ctrl === "PlayPause") {
+        return _this2.state.cleared ? _this2.restartGame() : _this2.setState(function (prevState) {
+          return { running: !prevState.running };
+        });
+      }
+      // Clear button
+      if (ctrl === "Clear") {
+        // Stop iterating life
+        return _this2.setState({ running: false, gen: 0 }, function () {
+          // Clear the grid
+          _this2.randomGrid(true);
+        });
+      }
+      // Grow/Shrink buttons
+      if (ctrl === "Grow" || ctrl === "Shrink") {
+        if (ctrl === "Grow" && _this2.state.size < 86) {
+          _this2.setState(function (prevState) {
+            return {
+              size: prevState.size + 10,
+              running: false
+            };
+          });
+          return _this2.restartGame();
+        }
+        if (ctrl === "Shrink" && _this2.state.size > 14) {
+          _this2.setState(function (prevState) {
+            return {
+              size: prevState.size - 10,
+              running: false
+            };
+          });
+          return _this2.restartGame();
+        }
+      } else return _this2.restartGame(); // Restart button
+    };
+
+    _this2.timer = null;
+    _this2.state = {
       running: false,
       cleared: false,
       cells: [],
       gen: 0,
       size: 25
     };
-    return _this3;
+    return _this2;
   }
 
   // Upon load, create a random grid and begin life
 
   GridContainer.prototype.componentDidMount = function componentDidMount() {
-    var _this4 = this;
+    var _this3 = this;
 
     this.restartGame();
     this.timer = setInterval(function () {
-      if (_this4.state.running) _this4.iterateLife();
+      if (_this3.state.running) _this3.iterateLife();
     }, 100);
   };
 
@@ -209,65 +232,24 @@ var GridContainer = function (_React$Component3) {
 
   // Handle clicks from ButtonGroup
 
-  GridContainer.prototype.handleClick = function handleClick(e) {
-    var _this5 = this;
-
-    var ctrl = e.target.dataset.ctrl;
-    // Play/Pause buttons
-    if (ctrl === 'PlayPause') {
-      return this.state.cleared ? this.restartGame() : this.setState(function (prevState) {
-        return { running: !prevState.running };
-      });
-    }
-    // Clear button
-    if (ctrl === 'Clear') {
-      // Stop iterating life
-      return this.setState({ running: false, gen: 0 }, function () {
-        // Clear the grid
-        _this5.randomGrid(true);
-      });
-    }
-    // Grow/Shrink buttons
-    if (ctrl === 'Grow' || ctrl === 'Shrink') {
-      if (ctrl === 'Grow' && this.state.size < 86) {
-        this.setState(function (prevState) {
-          return {
-            size: prevState.size + 10,
-            running: false
-          };
-        });
-        return this.restartGame();
-      }
-      if (ctrl === 'Shrink' && this.state.size > 14) {
-        this.setState(function (prevState) {
-          return {
-            size: prevState.size - 10,
-            running: false
-          };
-        });
-        return this.restartGame();
-      }
-    } else return this.restartGame(); // Restart button
-  };
-
   // Restart game with a new grid
 
   GridContainer.prototype.restartGame = function restartGame() {
-    var _this6 = this;
+    var _this4 = this;
 
     // Restore initial state
     this.setState({ running: false, cells: [], gen: 0, cleared: false }, function () {
       // Create a random grid
-      _this6.randomGrid();
+      _this4.randomGrid();
       // Restart running state
-      _this6.setState({ running: true });
+      _this4.setState({ running: true });
     });
   };
 
   // Iterate life, based on Conway's rules
 
   GridContainer.prototype.iterateLife = function iterateLife() {
-    var _this7 = this;
+    var _this5 = this;
 
     // Ensure the grid should be running
     if (!this.state.running) return;
@@ -277,7 +259,7 @@ var GridContainer = function (_React$Component3) {
     this.state.cells.forEach(function (row, rowIdx) {
       // Implement Conway's rules
       row.forEach(function (cell, cellIdx) {
-        var neighbors = _this7.tallyNeighbors(rowIdx, cellIdx);
+        var neighbors = _this5.tallyNeighbors(rowIdx, cellIdx);
         // Live cells with < 2 or > 3 neighbors should die
         if (cell) {
           nextGrid[rowIdx][cellIdx] = !!(neighbors === 2 || neighbors === 3);
@@ -331,10 +313,7 @@ var GridContainer = function (_React$Component3) {
     return React.createElement(
       "div",
       null,
-      React.createElement(ButtonGroup, {
-        onCtrl: this.handleClick.bind(this),
-        running: this.state.running
-      }),
+      React.createElement(ButtonGroup, { onCtrl: this.handleClick, running: this.state.running }),
       React.createElement(Grid, { cells: this.state.cells, size: this.state.size }),
       React.createElement(
         "h2",
