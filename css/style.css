@@ -1,22 +1,26 @@
 body {
-  background: #110;
+  background-color: #110;
   color: #990;
   text-align: center;
-  font-family: Tahoma;
+  font-family: Tahoma, sans-serif;
 }
 
 button {
   background-color: #000;
-  color: #990;
   border: 1px solid #990;
   border-radius: 3px;
+  color: #990;
+  cursor: pointer;
   font-size: 24px;
   height: 50px;
   width: 50px;
-  transition: color .2s;
-  cursor: pointer;
+  transition: color 0.2s;
 }
 
 button:hover {
   color: #cc8;
+}
+
+button:disabled {
+  color: #330;
 }
